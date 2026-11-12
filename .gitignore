@@ -1,0 +1,8 @@
+# Local research papers and extracted text must never be published.
+sources/
+node_modules/
+.env
+.env.*
+.DS_Store
+coverage/
+*.log
