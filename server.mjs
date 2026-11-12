@@ -3,7 +3,8 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { assemblePrompt, parsePages, verifyAnswer } from './evidence.mjs';
+import { parsePages, verifyAnswer } from './evidence.mjs';
+import { prepareEvidence, evidencePrompt, resolveEvidenceAnswer, evidenceFallback } from './grounding.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const STATIC = new Map([
@@ -11,12 +12,13 @@ const STATIC = new Map([
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
   ['/research.html', ['research.html', 'text/html; charset=utf-8']],
   ['/assets/styles.css', ['assets/styles.css', 'text/css; charset=utf-8']],
+  ['/assets/guide.css', ['assets/guide.css', 'text/css; charset=utf-8']],
   ['/assets/research.js', ['assets/research.js', 'text/javascript; charset=utf-8']],
   ['/favicon.svg', ['favicon.svg', 'image/svg+xml']]
 ]);
 const MAX_QUESTION = 2000;
 const MAX_BODY = 16_384;
-const MAX_SOURCES = 1_000_000;
+// The model sees a bounded, question-relevant excerpt selection, not the entire library.
 
 function respond(res, status, payload) {
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
@@ -99,17 +101,20 @@ export function createAppServer({root = ROOT, runner = runCodex} = {}) {
         const sources = await readSources(root);
         const pages = parsePages(sources);
         if (!pages.some(p=>p.text.length)) { respond(res,200,{answer:'Not in my sources.'}); return; }
-        const totalLength = sources.reduce((count,s)=>count+s.content.length,0);
-        if (totalLength > MAX_SOURCES) { respond(res,413,{error:'Source library is too large for a single request. Reduce the source collection.'}); return; }
         let instructions;
         try { instructions = await readFile(path.join(root,'prompts',`${body.mode}.txt`),'utf8'); }
         catch (error) { if (error.code==='ENOENT') { respond(res,503,{error:`${body.mode} mode isn't set up yet.`}); return; } throw error; }
-        const prompt = assemblePrompt(instructions,sources,body.question);
-        let answer;
-        try { answer = await runner(prompt, path.join(root,'sources','text')); }
+        const cards = prepareEvidence(pages,body.question);
+        if (!cards.length) { respond(res,200,{answer:'Not in my sources.'}); return; }
+        const prompt = evidencePrompt(instructions,cards,body.question);
+        let rawAnswer;
+        try { rawAnswer = await runner(prompt, path.join(root,'sources','text')); }
         catch (error) { respond(res,502,{error:error.message}); return; }
-        if (!verifyAnswer(answer,pages).ok) { respond(res,502,{error:'Evidence verification failed. Codex returned a quotation or citation that could not be verified against the extracted source segments. Try asking a narrower question.'}); return; }
-        respond(res,200,{answer});
+        const grounded = resolveEvidenceAnswer(rawAnswer,cards);
+        if (grounded.ok) { respond(res,200,{answer:grounded.answer}); return; }
+        // Backwards compatibility: accept an older-style answer only if every quote is verifiable.
+        if (verifyAnswer(rawAnswer,pages).ok) { respond(res,200,{answer:rawAnswer}); return; }
+        respond(res,200,{answer:evidenceFallback(cards),warning:'Codex response lacked verifiable citations.'});
       } catch(error) { respond(res,error.status || 500,{error:error.status ? error.message : 'The research request could not be completed.'}); }
       return;
     }

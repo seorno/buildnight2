@@ -52,7 +52,7 @@ async function submit(mode) {
     const response = await fetch('api/ask', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({mode,question}) });
     const data = await response.json();
     if (!response.ok) throw Error(data.error || 'Something went wrong.');
-    setAnswer(data.answer);
+    setAnswer(data.answer, data.warning ? 'error' : 'result');
   } catch (error) { setAnswer(error.message || 'Request failed.', 'error'); }
   finally { busy=false; ask.disabled=false; debate.disabled=false; }
 }

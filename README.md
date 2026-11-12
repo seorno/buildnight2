@@ -1,6 +1,6 @@
 # The Research Partner
 
-An independent, **local-first research companion** built for Bath Entrepreneurs' Innov8 Build Night 2. Ask questions about your own PDF readings, or use Debate mode to challenge a claim using only those readings.
+A local-first, source-grounded research companion built for Bath Entrepreneurs' Innov8 Build Night 2. Use PDFs, TXT lecture notes and PPTX slide decks in nested folders. Ask a question or challenge a claim using only your own materials.
 
 [Open the research room after starting the server](http://localhost:3000/research.html)
 
@@ -30,7 +30,7 @@ If you add, remove or change PDFs, rerun `npm run convert`. The converter writes
 - **Challenge:** Makes the strongest evidence-backed case against your claim, without inventing a counterargument.
 - **Not in my sources.:** Returned when there is no basis for an answer.
 
-The server checks that each double-quoted excerpt appears on the exact cited PDF page. **This is a literal-quotation check, not a guarantee that the model's interpretation or the research itself is correct.** A good answer can be rejected if PDF extraction garbles words, punctuation or line breaks. Review the original paper before relying on a result.
+Codex now cites server-numbered evidence excerpts (e.g., [E1]) rather than writing exact quotations itself. The server resolves those IDs to original page, slide or line references and inserts verbatim text. If Codex returns an unverified answer, the app shows only a clearly labelled extractive fallback, never unsupported generated assertions. This checks literal attribution, not whether an interpretation is sound. Always read the original source before relying on it.
 
 ## Privacy and deployment
 
@@ -38,7 +38,7 @@ The server checks that each double-quoted excerpt appears on the exact cited PDF
 
 The homepage and research interface can be statically hosted, but **questions only work while the Node API is running locally**. On GitHub Pages, the Research page displays a demo/offline message rather than pretending its backend is deployed. No hosted backend, accounts, database or API keys are included.
 
-The server uses `codex exec --skip-git-repo-check --ephemeral --sandbox read-only -`, with a 120-second timeout. The response must contain exact quotes followed by `(filename.pdf, p. N)` citations, or exactly `Not in my sources.`. Invalid citations are rejected rather than displayed. The system does not perform OCR or semantic retrieval; it sends all extracted text per request, with a 1 MB source limit to prevent runaway contexts.
+The server calls `codex exec --skip-git-repo-check --ephemeral --sandbox read-only -` with a 120-second timeout. Each Ask or Debate request consumes applicable Codex usage. Rather than sending the full library each time, it selects at most 80 relevant, bounded excerpts. This is not comprehensive semantic retrieval; for very large reading collections, verify important omissions manually. No OCR is included.
 
 ## Checks
 

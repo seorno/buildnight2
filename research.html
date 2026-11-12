@@ -1,46 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f5ef">
-  <title>Research Room — The Research Partner</title>
-  <meta name="description" content="Ask and debate research claims against your own PDF sources, with verifiable page citations.">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf9f7">
+  <title>Research — The Research Partner</title>
+  <meta name="description" content="Ask and debate claims using only your PDFs, presentations and lecture notes.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/guide.css">
   <script defer src="assets/research.js"></script>
 </head>
-<body>
-  <div class="site-shell">
-    <header class="topbar">
-      <a class="brand" href="index.html" aria-label="The Research Partner home"><span class="brand-mark">R<span class="brand-dot">·</span></span><span>THE RESEARCH<br>PARTNER</span></a>
-      <nav class="top-nav" aria-label="Main navigation"><a href="index.html">Overview</a><a class="active" href="research.html" aria-current="page">Research room <span aria-hidden="true">↗</span></a></nav>
-      <span class="topbar-note">AN EXPERIMENT IN EVIDENCE</span>
+<body class="guide-page">
+  <main class="guide-shell">
+    <nav class="guide-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="research.html" aria-current="page">Research</a></nav>
+    <header class="guide-header">
+      <p class="guide-kicker">BN2 · THE RESEARCH PARTNER</p>
+      <h1>Research</h1>
+      <p>Answers from your own readings, with exact source excerpts and locations.</p>
     </header>
-    <main class="research-main">
-      <div class="section-index"><span class="rule-index">02 / THE RESEARCH ROOM</span><span>YOUR SOURCES. NO SHORTCUTS.</span></div>
-      <section class="research-intro"><div><p class="eyebrow"><span class="tiny-star">✳</span> SOURCE-BOUND INQUIRY</p><h1>Where ideas meet<br><em>their evidence.</em></h1><p class="intro-copy">A workspace for testing questions and counterarguments against the papers on your laptop. Nothing beyond your source library.</p></div><div class="section-stamp">THE<br>RESEARCH<br>PARTNER<span>↗</span></div></section>
-      <div class="workspace-grid">
-        <section class="workspace" aria-labelledby="question-label">
-          <div class="panel-heading"><span class="panel-kicker">01 — YOUR QUESTION</span><span class="panel-hint">WRITE YOUR INQUIRY BELOW</span></div>
-          <form id="research-form" novalidate>
-            <label id="question-label" class="form-label" for="question">What would you like to investigate?</label>
-            <textarea id="question" name="question" maxlength="2000" required rows="5" placeholder="e.g. Does working from home make teams more productive?"></textarea>
-            <div class="input-footer"><span>Start with a question or a claim worth defending.</span><span id="char-count">0 / 2000</span></div>
-            <div class="actions"><button class="button button-dark" id="ask-button" type="submit" data-mode="ask">Ask the evidence <span aria-hidden="true">↗</span></button><button class="button button-outline" id="debate-button" type="button">Challenge my claim <span aria-hidden="true">↗</span></button></div>
-          </form>
-          <div class="suggestions"><span>TRY AN EXAMPLE</span><div class="chips"><button type="button" class="chip" data-question="What does the evidence say about productivity?">On productivity</button><button type="button" class="chip" data-question="What are the limitations of the evidence?">Find limitations</button><button type="button" class="chip" data-question="Do the readings disagree on any important point?">Find disagreements</button></div></div>
-          <section class="answer-panel" aria-labelledby="answer-title"><div class="answer-header"><div><span class="answer-bullet"></span><span id="answer-title">RESEARCH NOTES</span></div><span id="answer-mode">READY</span></div><div id="answer" role="status" aria-live="polite" class="answer-placeholder"><p>The most interesting answers begin with a question.</p><span>Write yours above and choose Ask or Challenge.</span></div></section>
-        </section>
-        <aside class="side-panel" aria-label="Research library status">
-          <div class="aside-top"><span class="panel-kicker">02 — YOUR LIBRARY</span><span class="side-symbol">✳</span></div>
-          <div class="library-status"><div class="status-indicator"><span class="status-dot" id="status-dot"></span><span id="library-label">Checking your library</span></div><div class="stat-grid"><div><strong id="doc-count">—</strong><span>DOCUMENTS</span></div><div><strong id="page-count">—</strong><span>PAGES INDEXED</span></div></div></div>
-          <div class="side-divider"></div><p class="aside-title">How this room works</p>
-          <ol class="instruction-steps"><li><span>01</span><p>Place your PDF papers inside the local <code>sources/</code> folder.</p></li><li><span>02</span><p>Run <code>npm run convert</code> to index text and page numbers.</p></li><li><span>03</span><p>Ask a question, or challenge a claim, with your evidence.</p></li></ol>
-          <div class="aside-note"><span class="note-icon">↗</span><p>Every quoted passage is checked against its cited page. Interpretations still need your judgment.</p></div>
-        </aside>
-      </div>
-      <div class="under-workspace"><span>NO EVIDENCE? NO INVENTED ANSWERS.</span><span>LOCAL-FIRST · YOUR FILES STAY ON YOUR MACHINE</span></div>
-    </main>
-    <footer class="footer"><span>THE RESEARCH PARTNER / BUILD NIGHT 02</span><span>THINK CRITICALLY. CITE CAREFULLY.</span></footer>
-  </div>
+    <section class="guide-workspace" aria-label="Ask your sources">
+      <form id="research-form" novalidate>
+        <label class="visually-hidden" for="question">Your question or claim</label>
+        <textarea id="question" name="question" rows="4" maxlength="2000" required placeholder="What do my readings say about employee motivation?"></textarea>
+        <div class="guide-input-meta"><span>Ask a question or enter a claim to challenge.</span><span id="char-count">0 / 2000</span></div>
+        <div class="guide-actions">
+          <button id="ask-button" type="submit" class="guide-button guide-button-primary">Ask</button>
+          <button id="debate-button" type="button" class="guide-button guide-button-secondary">Debate</button>
+        </div>
+      </form>
+      <section class="guide-answer" aria-labelledby="answer-title">
+        <div class="guide-answer-head"><span id="answer-title">Research notes</span><span id="answer-mode">READY</span></div>
+        <div id="answer" class="answer-placeholder" role="status" aria-live="polite">Your evidence-based answer will appear here.</div>
+      </section>
+    </section>
+    <aside class="guide-library" aria-label="Indexed sources">
+      <span class="status-dot" id="status-dot"></span>
+      <strong id="library-label">Checking library</strong>
+      <span><span id="doc-count">—</span> documents</span>
+      <span><span id="page-count">—</span> source sections</span>
+    </aside>
+    <p class="guide-footnote">Place PDFs, TXT files or PPTX slides in <code>sources/</code> (including nested folders), then run <code>npm run convert</code>. Every Ask or Debate request uses your Codex allowance. Excerpts are exact, but interpretation still requires judgement.</p>
+  </main>
 </body>
 </html>
