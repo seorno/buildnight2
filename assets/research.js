@@ -47,7 +47,7 @@ async function submit(mode) {
   busy = true;
   ask.disabled = true; debate.disabled = true;
   answerMode.textContent = mode === 'debate' ? 'CHALLENGE MODE' : 'ASK MODE';
-  setAnswer('Thinking…\n\nReviewing your supplied readings and checking page references.', 'waiting');
+  setAnswer('Thinking…\n\nReviewing your supplied readings and checking source references.', 'waiting');
   try {
     const response = await fetch('api/ask', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({mode,question}) });
     const data = await response.json();

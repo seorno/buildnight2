@@ -36,11 +36,23 @@ async function collectBody(req) {
 }
 
 async function readSources(root) {
-  const dir = path.join(root, 'sources', 'text');
-  let names;
-  try { names = await readdir(dir); }
-  catch (error) { if (error.code === 'ENOENT') return []; throw error; }
-  return Promise.all(names.filter(n => n.endsWith('.pdf.txt')).sort().map(async name => ({ name, content: await readFile(path.join(dir, name), 'utf8') })));
+  const directory = path.join(root, 'sources', 'text');
+  async function scan(dir, prefix = '') {
+    let entries;
+    try { entries = await readdir(dir, { withFileTypes: true }); }
+    catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+    const results=[];
+    for (const entry of entries.sort((a,b)=>a.name.localeCompare(b.name, 'en'))) {
+      const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+      const absolute = path.join(dir,entry.name);
+      if (entry.isDirectory()) results.push(...await scan(absolute,relative));
+      else if (entry.isFile() && /\.(?:pdf|pptx|txt)\.txt$/i.test(entry.name)) {
+        results.push({name:relative,content:await readFile(absolute,'utf8')});
+      }
+    }
+    return results;
+  }
+  return scan(directory);
 }
 
 /** Runs Codex without handing filenames or user input to a shell command. */
@@ -88,7 +100,7 @@ export function createAppServer({root = ROOT, runner = runCodex} = {}) {
         const pages = parsePages(sources);
         if (!pages.some(p=>p.text.length)) { respond(res,200,{answer:'Not in my sources.'}); return; }
         const totalLength = sources.reduce((count,s)=>count+s.content.length,0);
-        if (totalLength > MAX_SOURCES) { respond(res,413,{error:'Source library is too large for a single request. Reduce the PDF collection.'}); return; }
+        if (totalLength > MAX_SOURCES) { respond(res,413,{error:'Source library is too large for a single request. Reduce the source collection.'}); return; }
         let instructions;
         try { instructions = await readFile(path.join(root,'prompts',`${body.mode}.txt`),'utf8'); }
         catch (error) { if (error.code==='ENOENT') { respond(res,503,{error:`${body.mode} mode isn't set up yet.`}); return; } throw error; }
@@ -96,7 +108,7 @@ export function createAppServer({root = ROOT, runner = runCodex} = {}) {
         let answer;
         try { answer = await runner(prompt, path.join(root,'sources','text')); }
         catch (error) { respond(res,502,{error:error.message}); return; }
-        if (!verifyAnswer(answer,pages).ok) { respond(res,502,{error:'Evidence verification failed. Codex returned a quotation or citation that could not be verified against the extracted PDF pages. Try asking a narrower question.'}); return; }
+        if (!verifyAnswer(answer,pages).ok) { respond(res,502,{error:'Evidence verification failed. Codex returned a quotation or citation that could not be verified against the extracted source segments. Try asking a narrower question.'}); return; }
         respond(res,200,{answer});
       } catch(error) { respond(res,error.status || 500,{error:error.status ? error.message : 'The research request could not be completed.'}); }
       return;

@@ -11,5 +11,5 @@
     "test": "node --test tests/*.test.mjs",
     "check": "node --check server.mjs && node --check convert.mjs && node --check assets/research.js && npm test"
   },
-  "dependencies": { "pdfjs-dist": "4.10.38" }
+  "dependencies": { "pdfjs-dist": "4.10.38", "jszip": "3.10.1" }
 }
