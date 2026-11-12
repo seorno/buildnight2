@@ -50,11 +50,26 @@ test('rejects blank questions', async t => {
   assert.equal((await post(url,{mode:'ask',question:'   '})).status,400);
 });
 
-test('rejects fabricated model evidence instead of displaying it', async t => {
+test('never displays fabricated model evidence and instead provides clearly labelled source text', async t => {
   const url = await fixture(t, async () => '"Invented conclusion." (paper.pdf, p. 1)');
   const response = await post(url, {mode:'ask',question:'Is there proof?'});
-  assert.equal(response.status,502);
-  assert.match((await response.json()).error, /verification/i);
+  assert.equal(response.status,200);
+  const body=await response.json();
+  assert.match(body.warning,/verifiable citations/i);
+  assert.match(body.answer,/could not be verified/i);
+  assert.match(body.answer,/Evidence is essential/);
+  assert.doesNotMatch(body.answer,/Invented conclusion/);
+});
+
+test('resolves evidence IDs from Codex to true source quotations', async t => {
+  const url = await fixture(t, async () => 'Evidence matters for research. [E1]');
+  const response = await post(url, {mode:'ask',question:'What does evidence do?'});
+  assert.equal(response.status,200);
+  const body=await response.json();
+  assert.match(body.answer,/Evidence matters for research\. \(paper\.pdf, p\. 1\)/);
+  assert.match(body.answer,/VERBATIM SOURCE EXCERPTS/);
+  assert.match(body.answer,/“Evidence is essential\.” \(paper\.pdf, p\. 1\)/);
+  assert.equal(body.warning,undefined);
 });
 
 test('never serves private sources, prompts, or arbitrary files', async t => {
