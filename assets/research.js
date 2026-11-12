@@ -19,7 +19,7 @@ function setAnswer(text, state='result') {
 
 async function refreshLibrary() {
   try {
-    const response = await fetch('/api/status', {cache:'no-store'});
+    const response = await fetch('api/status', {cache:'no-store'});
     if (!response.ok || !(response.headers.get('content-type') ?? '').includes('application/json')) throw Error('No local API');
     const result = await response.json();
     if (typeof result.documents !== 'number' || typeof result.pages !== 'number') throw Error('Invalid status');
@@ -49,7 +49,7 @@ async function submit(mode) {
   answerMode.textContent = mode === 'debate' ? 'CHALLENGE MODE' : 'ASK MODE';
   setAnswer('Thinking…\n\nReviewing your supplied readings and checking page references.', 'waiting');
   try {
-    const response = await fetch('/api/ask', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({mode,question}) });
+    const response = await fetch('api/ask', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({mode,question}) });
     const data = await response.json();
     if (!response.ok) throw Error(data.error || 'Something went wrong.');
     setAnswer(data.answer);
